@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
-import { MessageSquare, Plus, Save, Search, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, MessageSquare, Plus, Save, Search, Trash2 } from "lucide-react";
 import { isOverdue } from "@/lib/analytics";
 import type { Dictionaries, Lead, LeadFilters, LeadInput, User } from "@/lib/types";
 import { Badge, Button, Field, GhostButton, IconButton, Input, Panel, Select, Textarea } from "./ui";
@@ -31,11 +31,39 @@ const blankLead: LeadInput = {
   next_contact_date: ""
 };
 
+type SortKey = "customer_name" | "status" | "course" | "source" | "manager" | "contact" | "next_contact_date";
+type SortDirection = "asc" | "desc";
+
 export function LeadsView({ canDelete, dictionaries, filters, leads, loading, users, onAddComment, onCreate, onDelete, onFilter, onUpdate }: Props) {
   const [draft, setDraft] = useState<LeadInput>({ ...blankLead, status_id: dictionaries.statuses[0]?.id ?? 1 });
   const [selectedId, setSelectedId] = useState<number | null>(leads[0]?.id ?? null);
   const [comment, setComment] = useState("");
+  const [sort, setSort] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
   const selected = useMemo(() => leads.find((lead) => lead.id === selectedId) ?? leads[0], [leads, selectedId]);
+  const sortedLeads = useMemo(() => {
+    if (!sort) return leads;
+
+    return [...leads].sort((left, right) => {
+      const leftValue = getSortValue(left, sort.key);
+      const rightValue = getSortValue(right, sort.key);
+
+      if (!leftValue && rightValue) return 1;
+      if (leftValue && !rightValue) return -1;
+
+      const comparison = compareSortValues(leftValue, rightValue);
+      return comparison === 0
+        ? left.id - right.id
+        : comparison * (sort.direction === "asc" ? 1 : -1);
+    });
+  }, [leads, sort]);
+
+  function toggleSort(key: SortKey) {
+    setSort((current) => {
+      if (!current || current.key !== key) return { key, direction: "asc" };
+      if (current.direction === "asc") return { key, direction: "desc" };
+      return null;
+    });
+  }
 
   async function create(event: FormEvent) {
     event.preventDefault();
@@ -101,17 +129,17 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
             <table className="w-full min-w-[920px] border-collapse text-sm">
               <thead className="bg-panel text-left text-xs uppercase text-muted">
                 <tr>
-                  <th className="px-4 py-3">Клиент</th>
-                  <th className="px-4 py-3">Статус</th>
-                  <th className="px-4 py-3">Курс</th>
-                  <th className="px-4 py-3">Источник</th>
-                  <th className="px-4 py-3">Менеджер</th>
-                  <th className="px-4 py-3">Контакт</th>
-                  <th className="px-4 py-3">Следующий контакт</th>
+                  <SortableHeader label="Клиент" sortKey="customer_name" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Статус" sortKey="status" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Курс" sortKey="course" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Источник" sortKey="source" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Менеджер" sortKey="manager" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Контакт" sortKey="contact" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="Следующий контакт" sortKey="next_contact_date" sort={sort} onSort={toggleSort} />
                 </tr>
               </thead>
               <tbody>
-                {leads.map((lead) => (
+                {sortedLeads.map((lead) => (
                   <tr
                     key={lead.id}
                     className={`cursor-pointer border-t border-line hover:bg-panel ${selected?.id === lead.id ? "bg-blue-50" : ""}`}
@@ -186,6 +214,61 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
       </div>
     </div>
   );
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  sort,
+  onSort
+}: {
+  label: string;
+  sortKey: SortKey;
+  sort: { key: SortKey; direction: SortDirection } | null;
+  onSort: (key: SortKey) => void;
+}) {
+  const activeDirection = sort?.key === sortKey ? sort.direction : null;
+  const Icon = activeDirection === "asc" ? ArrowUp : activeDirection === "desc" ? ArrowDown : ArrowUpDown;
+
+  return (
+    <th
+      className="px-2 py-1"
+      aria-sort={activeDirection === "asc" ? "ascending" : activeDirection === "desc" ? "descending" : "none"}
+    >
+      <button
+        type="button"
+        className="flex min-h-10 w-full items-center gap-1 rounded px-2 text-left font-semibold hover:bg-line/50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        title={`Сортировать: ${label.toLowerCase()}`}
+        onClick={() => onSort(sortKey)}
+      >
+        <span>{label}</span>
+        <Icon className={activeDirection ? "text-blue-600" : "text-muted"} size={14} aria-hidden="true" />
+      </button>
+    </th>
+  );
+}
+
+function getSortValue(lead: Lead, key: SortKey): string {
+  switch (key) {
+    case "customer_name":
+      return lead.customer_name;
+    case "status":
+      return lead.status.name;
+    case "course":
+      return lead.course?.name ?? "";
+    case "source":
+      return lead.source?.name ?? "";
+    case "manager":
+      return lead.assigned_manager?.full_name ?? "";
+    case "contact":
+      return lead.contact;
+    case "next_contact_date":
+      return lead.next_contact_date ?? "";
+  }
+}
+
+function compareSortValues(left: string, right: string): number {
+  return left.localeCompare(right, "ru", { numeric: true, sensitivity: "base" });
 }
 
 function LeadEditor({
