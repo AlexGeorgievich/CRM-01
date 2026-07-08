@@ -1,0 +1,71 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: crm_postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-crm_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-crm_password}
+      POSTGRES_DB: ${POSTGRES_DB:-crm_db}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - crm_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-crm_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: crm_redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - crm_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build: .
+    container_name: crm_app
+    env_file:
+      - .env
+    ports:
+      - "${APP_PORT:-8001}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./app:/app/app
+    networks:
+      - crm_network
+
+  frontend:
+    build:
+      context: ../crm-frontend
+    container_name: crm_frontend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:${APP_PORT:-8001}/api/v1
+      NEXT_PUBLIC_USE_MOCKS: ${NEXT_PUBLIC_USE_MOCKS:-true}
+    ports:
+      - "${FRONTEND_PORT:-3002}:3002"
+    depends_on:
+      - app
+    networks:
+      - crm_network
+
+volumes:
+  pg_data:
+  redis_data:
+
+networks:
+  crm_network:
+    driver: bridge

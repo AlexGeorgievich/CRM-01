@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CRM-MiniSystem</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section id="loginView" class="login-view">
+        <form id="loginForm" class="login-panel">
+          <div>
+            <p class="eyebrow">CRM-MiniSystem</p>
+            <h1>Вход в CRM</h1>
+          </div>
+          <label>
+            <span>Логин</span>
+            <input id="loginUsername" autocomplete="username" value="admin" required />
+          </label>
+          <label>
+            <span>Пароль</span>
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              value="admin12345"
+              required
+            />
+          </label>
+          <button type="submit">Войти</button>
+          <p id="loginError" class="error-text"></p>
+        </form>
+      </section>
+
+      <section id="crmView" class="crm-view is-hidden">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Учебный центр</p>
+            <h1>Заявки</h1>
+          </div>
+          <div class="topbar-actions">
+            <span id="currentUser" class="user-badge"></span>
+            <button id="logoutButton" class="secondary-button" type="button">Выйти</button>
+          </div>
+        </header>
+
+        <section class="toolbar" aria-label="Фильтры заявок">
+          <label>
+            <span>Статус</span>
+            <select id="filterStatus"></select>
+          </label>
+          <label>
+            <span>Курс</span>
+            <select id="filterCourse"></select>
+          </label>
+          <label>
+            <span>Источник</span>
+            <select id="filterSource"></select>
+          </label>
+          <label>
+            <span>Ответственный</span>
+            <select id="filterManager"></select>
+          </label>
+          <label>
+            <span>Поиск</span>
+            <input id="filterSearch" placeholder="Имя или контакт" />
+          </label>
+          <button id="resetFiltersButton" class="secondary-button" type="button">Сбросить</button>
+          <button id="newLeadButton" type="button">Новая заявка</button>
+        </section>
+
+        <section class="content-grid">
+          <div class="lead-list-panel">
+            <div class="panel-header">
+              <h2>Список</h2>
+              <span id="leadCount" class="muted"></span>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Клиент</th>
+                    <th>Курс</th>
+                    <th>Статус</th>
+                    <th>Источник</th>
+                    <th>Ответственный</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="leadRows"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <aside class="detail-panel">
+            <div id="emptyDetail" class="empty-state">
+              <h2>Карточка заявки</h2>
+              <p>Выберите заявку из списка или создайте новую.</p>
+            </div>
+
+            <div id="leadDetail" class="is-hidden">
+              <div class="panel-header">
+                <h2 id="detailTitle"></h2>
+                <button id="deleteLeadButton" class="danger-button" type="button">Удалить</button>
+              </div>
+
+              <form id="leadForm" class="lead-form">
+                <input id="leadId" type="hidden" />
+                <label>
+                  <span>Имя клиента</span>
+                  <input id="leadCustomerName" required />
+                </label>
+                <label>
+                  <span>Контакт</span>
+                  <input id="leadContact" required />
+                </label>
+                <label>
+                  <span>Курс</span>
+                  <select id="leadCourse"></select>
+                </label>
+                <label>
+                  <span>Источник</span>
+                  <select id="leadSource"></select>
+                </label>
+                <label>
+                  <span>Статус</span>
+                  <select id="leadStatus" required></select>
+                </label>
+                <label>
+                  <span>Ответственный</span>
+                  <select id="leadManager"></select>
+                </label>
+                <label class="full">
+                  <span>Заметки</span>
+                  <textarea id="leadNotes" rows="4"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button id="cancelEditButton" class="secondary-button" type="button">Отмена</button>
+                  <button type="submit">Сохранить</button>
+                </div>
+              </form>
+
+              <section class="comments-panel">
+                <div class="panel-header">
+                  <h3>Комментарии</h3>
+                </div>
+                <div id="commentList" class="comment-list"></div>
+                <form id="commentForm" class="comment-form">
+                  <textarea id="commentBody" rows="3" placeholder="Добавить комментарий"></textarea>
+                  <button type="submit">Добавить</button>
+                </form>
+              </section>
+            </div>
+          </aside>
+        </section>
+      </section>
+
+      <div id="toast" class="toast is-hidden"></div>
+    </main>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

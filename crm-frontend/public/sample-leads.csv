@@ -1,0 +1,4 @@
+customer_name,contact,status,course,source,assigned_manager,notes,next_contact_date
+Антон Мельников,+7 900 200-10-01,new,Python Start,Сайт,manager,Импорт тестовой заявки,2026-07-12
+Лилия Павлова,+7 900 200-10-02,demo,Frontend Pro,Вебинар,Мария Ким,Проверить маппинг CSV,2026-07-09
+Сергей Миронов,+7 900 200-10-03,won,Data Analytics,Рекомендация,Илья Морозов,Проверка финального статуса,
