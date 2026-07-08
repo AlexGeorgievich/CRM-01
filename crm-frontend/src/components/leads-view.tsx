@@ -51,8 +51,8 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
-      <div className="grid gap-5">
+    <div className="grid items-start gap-5 xl:grid-cols-[minmax(0,1fr)_420px]">
+      <div className="grid auto-rows-max content-start gap-5">
         <Panel className="p-4">
           <div className="grid gap-3 md:grid-cols-6">
             <Field label="Поиск">
