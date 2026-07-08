@@ -1,6 +1,6 @@
 # CRM-MiniSystem Backend
 
-Backend MVP CRM-минисистемы для учета заявок учебного центра.
+Backend MVP CRM-минисистемы для учета заявок образовательного центра NexusCode.
 
 ## Стек
 
