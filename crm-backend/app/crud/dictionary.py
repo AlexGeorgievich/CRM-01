@@ -80,3 +80,25 @@ async def create_status(
     await db.commit()
     await db.refresh(status)
     return status
+
+
+async def get_dictionary_item(
+    db: AsyncSession,
+    model: type[DictionaryModel],
+    item_id: int,
+) -> DictionaryModel | None:
+    result = await db.execute(select(model).where(model.id == item_id))
+    return result.scalar_one_or_none()
+
+
+async def update_dictionary_item(
+    db: AsyncSession,
+    *,
+    item: DictionaryModel,
+    changes: dict,
+) -> DictionaryModel:
+    for field, value in changes.items():
+        setattr(item, field, value)
+    await db.commit()
+    await db.refresh(item)
+    return item

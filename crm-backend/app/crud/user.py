@@ -55,3 +55,28 @@ async def create_user(
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def update_user(
+    db: AsyncSession,
+    *,
+    user: User,
+    changes: dict,
+) -> User:
+    for field, value in changes.items():
+        setattr(user, field, value)
+    await db.commit()
+    await db.refresh(user)
+    return user
+
+
+async def reset_user_password(
+    db: AsyncSession,
+    *,
+    user: User,
+    password: str,
+) -> User:
+    user.hashed_password = get_password_hash(password)
+    await db.commit()
+    await db.refresh(user)
+    return user

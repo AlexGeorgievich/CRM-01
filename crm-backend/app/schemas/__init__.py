@@ -3,13 +3,16 @@ from app.schemas.common import Message, PageMeta, PaginationParams
 from app.schemas.dictionary import (
     CourseCreate,
     CourseRead,
+    CourseUpdate,
     SourceCreate,
     SourceRead,
+    SourceUpdate,
     StatusCreate,
     StatusRead,
+    StatusUpdate,
 )
 from app.schemas.lead import LeadCreate, LeadDetail, LeadList, LeadRead, LeadUpdate
-from app.schemas.user import Token, TokenPayload, UserCreate, UserRead
+from app.schemas.user import PasswordReset, Token, TokenPayload, UserCreate, UserRead, UserUpdate
 
 __all__ = [
     "CommentCreate",
@@ -19,10 +22,13 @@ __all__ = [
     "PaginationParams",
     "CourseCreate",
     "CourseRead",
+    "CourseUpdate",
     "SourceCreate",
     "SourceRead",
+    "SourceUpdate",
     "StatusCreate",
     "StatusRead",
+    "StatusUpdate",
     "LeadCreate",
     "LeadDetail",
     "LeadList",
@@ -30,6 +36,8 @@ __all__ = [
     "LeadUpdate",
     "Token",
     "TokenPayload",
+    "PasswordReset",
     "UserCreate",
     "UserRead",
+    "UserUpdate",
 ]

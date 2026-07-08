@@ -24,4 +24,9 @@ def test_openapi_contains_mvp_tags(client) -> None:
     assert "/api/v1/leads/import.csv" in paths
     assert "/api/v1/leads/{lead_id}/comments" in paths
     assert "/api/v1/dictionaries/statuses" in paths
+    assert "/api/v1/dictionaries/statuses/{status_id}" in paths
+    assert "/api/v1/dictionaries/courses/{course_id}" in paths
+    assert "/api/v1/dictionaries/sources/{source_id}" in paths
     assert "/api/v1/reports/summary" in paths
+    assert "/api/v1/users/{user_id}" in paths
+    assert "/api/v1/users/{user_id}/reset-password" in paths

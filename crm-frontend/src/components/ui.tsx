@@ -48,16 +48,16 @@ export function Field({ label, children }: { label: string; children: ReactNode 
   );
 }
 
-export function Input(props: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className="h-9 rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-brand" {...props} />;
+export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
+  return <input className={clsx("h-9 rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-brand", className)} {...props} />;
 }
 
-export function Select(props: SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select className="h-9 rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-brand" {...props} />;
+export function Select({ className, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
+  return <select className={clsx("h-9 rounded-md border border-line bg-white px-3 text-sm text-ink outline-none focus:border-brand", className)} {...props} />;
 }
 
-export function Textarea(props: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className="min-h-20 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand" {...props} />;
+export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return <textarea className={clsx("min-h-20 rounded-md border border-line bg-white px-3 py-2 text-sm text-ink outline-none focus:border-brand", className)} {...props} />;
 }
 
 export function Panel({ children, className }: { children: ReactNode; className?: string }) {

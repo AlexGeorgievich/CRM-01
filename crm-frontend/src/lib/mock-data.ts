@@ -1,8 +1,8 @@
-import type { Comment, Dictionaries, Lead, LeadFilters, LeadInput, User } from "./types";
+import type { Comment, Dictionaries, DictionaryInput, Lead, LeadFilters, LeadInput, StatusInput, User, UserCreateInput, UserUpdateInput } from "./types";
 
 const now = new Date("2026-07-08T12:00:00.000Z").toISOString();
 
-export const mockUsers: User[] = [
+export let mockUsers: User[] = [
   {
     id: 1,
     username: "admin",
@@ -45,7 +45,7 @@ export const mockUsers: User[] = [
   }
 ];
 
-export const mockDictionaries: Dictionaries = {
+export let mockDictionaries: Dictionaries = {
   statuses: [
     { id: 1, name: "Новая", code: "new", is_final: false, is_active: true, sort_order: 10, created_at: now, updated_at: now },
     { id: 2, name: "В работе", code: "in_progress", is_final: false, is_active: true, sort_order: 20, created_at: now, updated_at: now },
@@ -140,6 +140,66 @@ export function mockGetDictionaries() {
 
 export function mockGetUsers() {
   return structuredClone(mockUsers);
+}
+
+export function mockCreateUser(payload: UserCreateInput) {
+  if (mockUsers.some((user) => user.username === payload.username || (payload.email && user.email === payload.email))) {
+    throw new Error("Пользователь с таким логином или email уже существует");
+  }
+  const user: User = {
+    id: Math.max(...mockUsers.map((item) => item.id)) + 1,
+    username: payload.username,
+    email: payload.email ?? null,
+    full_name: payload.full_name,
+    role: payload.role,
+    is_active: payload.is_active,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  mockUsers = [...mockUsers, user];
+  return structuredClone(user);
+}
+
+export function mockUpdateUser(id: number, payload: UserUpdateInput) {
+  const index = mockUsers.findIndex((user) => user.id === id);
+  if (index < 0) throw new Error("Пользователь не найден");
+  mockUsers[index] = {
+    ...mockUsers[index],
+    ...payload,
+    updated_at: new Date().toISOString()
+  };
+  return structuredClone(mockUsers[index]);
+}
+
+export function mockResetPassword(id: number) {
+  const user = mockUsers.find((item) => item.id === id);
+  if (!user) throw new Error("Пользователь не найден");
+  return structuredClone(user);
+}
+
+export function mockCreateDictionaryItem(kind: keyof Dictionaries, payload: DictionaryInput | StatusInput) {
+  const collection = mockDictionaries[kind] as Array<Record<string, unknown>>;
+  const item = {
+    id: Math.max(...collection.map((entry) => Number(entry.id))) + 1,
+    ...payload,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  mockDictionaries = {
+    ...mockDictionaries,
+    [kind]: [...collection, item]
+  } as Dictionaries;
+  return structuredClone(item);
+}
+
+export function mockUpdateDictionaryItem(kind: keyof Dictionaries, id: number, payload: Partial<DictionaryInput | StatusInput>) {
+  const collection = mockDictionaries[kind] as Array<Record<string, unknown>>;
+  const index = collection.findIndex((item) => item.id === id);
+  if (index < 0) throw new Error("Запись справочника не найдена");
+  const next = [...collection];
+  next[index] = { ...next[index], ...payload, updated_at: new Date().toISOString() };
+  mockDictionaries = { ...mockDictionaries, [kind]: next } as Dictionaries;
+  return structuredClone(next[index]);
 }
 
 export function mockListLeads(user: User, filters: LeadFilters = {}) {

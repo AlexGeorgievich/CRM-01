@@ -11,6 +11,22 @@ export type User = {
   updated_at: string;
 };
 
+export type UserCreateInput = {
+  username: string;
+  password: string;
+  email?: string | null;
+  full_name: string;
+  role: Role;
+  is_active: boolean;
+};
+
+export type UserUpdateInput = {
+  email?: string | null;
+  full_name?: string;
+  role?: Role;
+  is_active?: boolean;
+};
+
 export type DictionaryItem = {
   id: number;
   name: string;
@@ -21,6 +37,17 @@ export type DictionaryItem = {
 };
 
 export type Status = DictionaryItem & {
+  code: string;
+  is_final: boolean;
+};
+
+export type DictionaryInput = {
+  name: string;
+  is_active: boolean;
+  sort_order: number;
+};
+
+export type StatusInput = DictionaryInput & {
   code: string;
   is_final: boolean;
 };

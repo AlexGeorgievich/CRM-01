@@ -2,10 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { BarChart3, Download, LayoutDashboard, LogOut, Settings, Upload, Users } from "lucide-react";
-import { addComment, createLead, deleteLead, loadDictionaries, loadLeads, loadUsers, login, updateLead } from "@/lib/api";
+import { addComment, createDictionaryItem, createLead, createUser, deleteLead, loadDictionaries, loadLeads, loadUsers, login, resetPassword, updateDictionaryItem, updateLead, updateUser } from "@/lib/api";
 import { buildAnalytics } from "@/lib/analytics";
 import { can } from "@/lib/permissions";
-import type { Dictionaries, Lead, LeadFilters, LeadInput, Session, User } from "@/lib/types";
+import type { Dictionaries, DictionaryInput, Lead, LeadFilters, LeadInput, Session, StatusInput, User, UserCreateInput, UserUpdateInput } from "@/lib/types";
 import { LoginCard } from "./login-card";
 import { DashboardView } from "./dashboard-view";
 import { LeadsView } from "./leads-view";
@@ -87,6 +87,36 @@ export function AppShell() {
   async function handleFilter(nextFilters: LeadFilters) {
     setFilters(nextFilters);
     await refresh(nextFilters);
+  }
+
+  async function handleCreateUser(payload: UserCreateInput) {
+    if (!session) return;
+    await createUser(session, payload);
+    await refresh();
+  }
+
+  async function handleUpdateUser(id: number, payload: UserUpdateInput) {
+    if (!session) return;
+    await updateUser(session, id, payload);
+    await refresh();
+  }
+
+  async function handleResetPassword(id: number, password: string) {
+    if (!session) return;
+    await resetPassword(session, id, password);
+    await refresh();
+  }
+
+  async function handleCreateDictionary(kind: keyof Dictionaries, payload: DictionaryInput | StatusInput) {
+    if (!session) return;
+    await createDictionaryItem(session, kind, payload);
+    await refresh();
+  }
+
+  async function handleUpdateDictionary(kind: keyof Dictionaries, id: number, payload: Partial<DictionaryInput | StatusInput>) {
+    if (!session) return;
+    await updateDictionaryItem(session, kind, id, payload);
+    await refresh();
   }
 
   if (!session) return <LoginCard onLogin={handleLogin} />;
@@ -178,7 +208,17 @@ export function AppShell() {
               onCreate={handleCreate}
             />
           ) : null}
-          {view === "admin" && can(session.user.role, "admin:view") ? <AdminView dictionaries={dictionaries} users={users} /> : null}
+          {view === "admin" && can(session.user.role, "admin:view") ? (
+            <AdminView
+              dictionaries={dictionaries}
+              users={users}
+              onCreateDictionary={handleCreateDictionary}
+              onCreateUser={handleCreateUser}
+              onResetPassword={handleResetPassword}
+              onUpdateDictionary={handleUpdateDictionary}
+              onUpdateUser={handleUpdateUser}
+            />
+          ) : null}
         </main>
       </div>
     </div>

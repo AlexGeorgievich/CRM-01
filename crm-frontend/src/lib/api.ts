@@ -1,14 +1,19 @@
 import {
   mockAddComment,
+  mockCreateDictionaryItem,
   mockCreateLead,
+  mockCreateUser,
   mockDeleteLead,
   mockGetDictionaries,
   mockGetUsers,
   mockListLeads,
   mockLogin,
-  mockUpdateLead
+  mockResetPassword,
+  mockUpdateDictionaryItem,
+  mockUpdateLead,
+  mockUpdateUser
 } from "./mock-data";
-import type { Dictionaries, Lead, LeadFilters, LeadInput, LeadList, Session, User } from "./types";
+import type { Dictionaries, DictionaryInput, Lead, LeadFilters, LeadInput, LeadList, Session, StatusInput, User, UserCreateInput, UserUpdateInput } from "./types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8001/api/v1";
 const USE_MOCKS = process.env.NEXT_PUBLIC_USE_MOCKS !== "false";
@@ -99,4 +104,42 @@ export async function deleteLead(session: Session, id: number) {
 export async function addComment(session: Session, leadId: number, body: string) {
   if (session.mode === "mock") return mockAddComment(session.user, leadId, body);
   return request(`/leads/${leadId}/comments`, session.token, { method: "POST", body: JSON.stringify({ body }) });
+}
+
+export async function createUser(session: Session, payload: UserCreateInput): Promise<User> {
+  if (session.mode === "mock") return mockCreateUser(payload);
+  return request<User>("/users", session.token, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateUser(session: Session, id: number, payload: UserUpdateInput): Promise<User> {
+  if (session.mode === "mock") return mockUpdateUser(id, payload);
+  return request<User>(`/users/${id}`, session.token, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+export async function resetPassword(session: Session, id: number, password: string): Promise<User> {
+  if (session.mode === "mock") return mockResetPassword(id);
+  return request<User>(`/users/${id}/reset-password`, session.token, { method: "POST", body: JSON.stringify({ password }) });
+}
+
+export async function createDictionaryItem(
+  session: Session,
+  kind: keyof Dictionaries,
+  payload: DictionaryInput | StatusInput
+) {
+  if (session.mode === "mock") return mockCreateDictionaryItem(kind, payload);
+  return request(`/dictionaries/${dictionaryPath(kind)}`, session.token, { method: "POST", body: JSON.stringify(payload) });
+}
+
+export async function updateDictionaryItem(
+  session: Session,
+  kind: keyof Dictionaries,
+  id: number,
+  payload: Partial<DictionaryInput | StatusInput>
+) {
+  if (session.mode === "mock") return mockUpdateDictionaryItem(kind, id, payload);
+  return request(`/dictionaries/${dictionaryPath(kind)}/${id}`, session.token, { method: "PATCH", body: JSON.stringify(payload) });
+}
+
+function dictionaryPath(kind: keyof Dictionaries) {
+  return kind;
 }

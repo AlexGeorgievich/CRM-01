@@ -137,6 +137,118 @@ def test_manager_cannot_create_users(client) -> None:
     assert response.status_code == 403
 
 
+def test_admin_can_manage_users(client) -> None:
+    headers = login(client)
+
+    create_response = client.post(
+        "/api/v1/users",
+        headers=headers,
+        json={
+            "username": "operator",
+            "password": "operator123",
+            "full_name": "CRM Operator",
+            "email": "operator@example.local",
+            "role": "manager",
+            "is_active": True,
+        },
+    )
+    assert create_response.status_code == 201
+    user = create_response.json()
+
+    block_response = client.patch(
+        f"/api/v1/users/{user['id']}",
+        headers=headers,
+        json={"is_active": False, "full_name": "Blocked Operator"},
+    )
+    assert block_response.status_code == 200
+    assert block_response.json()["is_active"] is False
+    assert block_response.json()["full_name"] == "Blocked Operator"
+
+    blocked_login = client.post(
+        "/api/v1/auth/login",
+        data={"username": "operator", "password": "operator123"},
+    )
+    assert blocked_login.status_code == 401
+
+    unblock_response = client.patch(
+        f"/api/v1/users/{user['id']}",
+        headers=headers,
+        json={"is_active": True},
+    )
+    assert unblock_response.status_code == 200
+
+    reset_response = client.post(
+        f"/api/v1/users/{user['id']}/reset-password",
+        headers=headers,
+        json={"password": "operator456"},
+    )
+    assert reset_response.status_code == 200
+
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "operator", "password": "operator456"},
+    )
+    assert login_response.status_code == 200
+
+
+def test_admin_can_manage_dictionaries(client) -> None:
+    headers = login(client)
+
+    course_response = client.post(
+        "/api/v1/dictionaries/courses",
+        headers=headers,
+        json={"name": "Backend Pro", "sort_order": 50, "is_active": True},
+    )
+    assert course_response.status_code == 201
+    course = course_response.json()
+
+    course_update = client.patch(
+        f"/api/v1/dictionaries/courses/{course['id']}",
+        headers=headers,
+        json={"name": "Backend Advanced", "is_active": False},
+    )
+    assert course_update.status_code == 200
+    assert course_update.json()["name"] == "Backend Advanced"
+    assert course_update.json()["is_active"] is False
+
+    source_response = client.post(
+        "/api/v1/dictionaries/sources",
+        headers=headers,
+        json={"name": "Telegram", "sort_order": 40, "is_active": True},
+    )
+    assert source_response.status_code == 201
+    source = source_response.json()
+    source_update = client.patch(
+        f"/api/v1/dictionaries/sources/{source['id']}",
+        headers=headers,
+        json={"sort_order": 5},
+    )
+    assert source_update.status_code == 200
+    assert source_update.json()["sort_order"] == 5
+
+    status_response = client.post(
+        "/api/v1/dictionaries/statuses",
+        headers=headers,
+        json={
+            "name": "Контракт",
+            "code": "contract",
+            "sort_order": 80,
+            "is_active": True,
+            "is_final": False,
+        },
+    )
+    assert status_response.status_code == 201
+    crm_status = status_response.json()
+    status_update = client.patch(
+        f"/api/v1/dictionaries/statuses/{crm_status['id']}",
+        headers=headers,
+        json={"code": "contract_signed", "is_final": True},
+    )
+    assert status_update.status_code == 200
+    assert status_update.json()["code"] == "contract_signed"
+    assert status_update.json()["is_final"] is True
+
+
 def test_manager_sees_only_assigned_leads(client) -> None:
     admin_headers = login(client)
     manager_headers = login(client, "manager", "manager12345")

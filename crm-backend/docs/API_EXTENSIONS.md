@@ -19,6 +19,50 @@ Backend использует две роли:
 Менеджер при создании заявки автоматически назначает ее на себя и не может назначить
 заявку другому менеджеру.
 
+## Управление пользователями
+
+Пользовательские административные операции доступны только роли `admin`.
+
+```http
+GET /api/v1/users
+POST /api/v1/users
+PATCH /api/v1/users/{user_id}
+POST /api/v1/users/{user_id}/reset-password
+```
+
+`PATCH /api/v1/users/{user_id}` поддерживает изменение:
+
+- `full_name`
+- `email`
+- `role`
+- `is_active`
+
+`POST /api/v1/users/{user_id}/reset-password` принимает:
+
+```json
+{
+  "password": "new-password"
+}
+```
+
+Заблокированный пользователь не проходит авторизацию.
+
+## Управление справочниками
+
+Создание и изменение справочников доступны только роли `admin`.
+
+```http
+POST /api/v1/dictionaries/statuses
+PATCH /api/v1/dictionaries/statuses/{status_id}
+POST /api/v1/dictionaries/courses
+PATCH /api/v1/dictionaries/courses/{course_id}
+POST /api/v1/dictionaries/sources
+PATCH /api/v1/dictionaries/sources/{source_id}
+```
+
+Для архивации используется `is_active=false`. Архивные записи не показываются в рабочих
+списках по умолчанию.
+
 ## Заявки и просрочки
 
 В модель `Lead` добавлено поле:

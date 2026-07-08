@@ -3,10 +3,10 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import require_admin
-from app.crud.user import create_user, list_users
+from app.crud.user import create_user, get_user_by_id, list_users, reset_user_password, update_user
 from app.database import get_db
 from app.models import User, UserRole
-from app.schemas import UserCreate, UserRead
+from app.schemas import PasswordReset, UserCreate, UserRead, UserUpdate
 
 router = APIRouter()
 
@@ -46,3 +46,43 @@ async def create_new_user(
             status_code=status.HTTP_409_CONFLICT,
             detail="username or email already exists",
         ) from exc
+
+
+@router.patch("/{user_id}", response_model=UserRead)
+async def update_existing_user(
+    user_id: int,
+    payload: UserUpdate,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> User:
+    user = await get_user_by_id(db, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+    changes = payload.model_dump(exclude_unset=True)
+    if "role" in changes and changes["role"] not in {UserRole.ADMIN.value, UserRole.MANAGER.value}:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="role must be admin or manager",
+        )
+    try:
+        return await update_user(db, user=user, changes=changes)
+    except IntegrityError as exc:
+        await db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="username or email already exists",
+        ) from exc
+
+
+@router.post("/{user_id}/reset-password", response_model=UserRead)
+async def reset_existing_user_password(
+    user_id: int,
+    payload: PasswordReset,
+    db: AsyncSession = Depends(get_db),
+    _: User = Depends(require_admin),
+) -> User:
+    user = await get_user_by_id(db, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+    return await reset_user_password(db, user=user, password=payload.password)
