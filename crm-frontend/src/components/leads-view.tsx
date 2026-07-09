@@ -39,6 +39,7 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
   const [selectedId, setSelectedId] = useState<number | null>(leads[0]?.id ?? null);
   const [comment, setComment] = useState("");
   const [sort, setSort] = useState<{ key: SortKey; direction: SortDirection } | null>(null);
+  const [updatingStatusId, setUpdatingStatusId] = useState<number | null>(null);
   const selected = useMemo(() => leads.find((lead) => lead.id === selectedId) ?? leads[0], [leads, selectedId]);
   const sortedLeads = useMemo(() => {
     if (!sort) return leads;
@@ -63,6 +64,16 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
       if (current.direction === "asc") return { key, direction: "desc" };
       return null;
     });
+  }
+
+  async function updateStatus(lead: Lead, statusId: number) {
+    if (statusId === lead.status_id) return;
+    setUpdatingStatusId(lead.id);
+    try {
+      await onUpdate(lead.id, { status_id: statusId });
+    } finally {
+      setUpdatingStatusId(null);
+    }
   }
 
   async function create(event: FormEvent) {
@@ -146,7 +157,20 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
                     onClick={() => setSelectedId(lead.id)}
                   >
                     <td className="px-4 py-3 font-medium">{lead.customer_name}</td>
-                    <td className="px-4 py-3"><Badge tone={lead.status.is_final ? "success" : "neutral"}>{lead.status.name}</Badge></td>
+                    <td className="px-4 py-2" onClick={(event) => event.stopPropagation()}>
+                      <Select
+                        className="h-8 min-w-36 py-1 text-xs"
+                        aria-label={`Статус заявки ${lead.customer_name}`}
+                        title="Изменить статус заявки"
+                        value={lead.status_id}
+                        disabled={updatingStatusId === lead.id}
+                        onChange={(event) => void updateStatus(lead, Number(event.target.value))}
+                      >
+                        {dictionaries.statuses.map((status) => (
+                          <option key={status.id} value={status.id}>{status.name}</option>
+                        ))}
+                      </Select>
+                    </td>
                     <td className="px-4 py-3">{lead.course?.name ?? "-"}</td>
                     <td className="px-4 py-3">{lead.source?.name ?? "-"}</td>
                     <td className="px-4 py-3">{lead.assigned_manager?.full_name ?? "-"}</td>

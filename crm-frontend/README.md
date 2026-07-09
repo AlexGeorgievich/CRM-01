@@ -35,7 +35,8 @@ Set `NEXT_PUBLIC_USE_MOCKS=false` to connect to the FastAPI backend.
 ## Implemented screens
 
 - Dashboard with KPI, funnel, source/course charts and manager workload.
-- Leads table with filters, create/edit form, overdue markers and comments.
+- Leads table with filters, sortable columns, inline status updates, create/edit form,
+  overdue markers and comments.
 - CSV export/import preview.
 - Admin panel for creating, blocking and activating users, resetting passwords, and managing dictionaries.
 - Role-based navigation for `admin` and `manager`.
