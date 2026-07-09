@@ -48,7 +48,14 @@ def _apply_filters(
         query = query.where(Lead.assigned_manager_id == assigned_manager_id)
     if search:
         like = f"%{search.strip()}%"
-        query = query.where(or_(Lead.customer_name.ilike(like), Lead.contact.ilike(like)))
+        query = query.where(
+            or_(
+                Lead.customer_name.ilike(like),
+                Lead.contact.ilike(like),
+                Lead.email.ilike(like),
+                Lead.notes.ilike(like),
+            )
+        )
     if overdue:
         query = query.join(Lead.status).where(
             Lead.next_contact_date.is_not(None),

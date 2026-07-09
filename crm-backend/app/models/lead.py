@@ -11,6 +11,7 @@ class Lead(TimestampMixin, Base):
 
     customer_name: Mapped[str] = mapped_column(String(255), index=True)
     contact: Mapped[str] = mapped_column(String(255), index=True)
+    email: Mapped[str | None] = mapped_column(String(320), index=True)
     notes: Mapped[str | None] = mapped_column(Text)
 
     course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"))

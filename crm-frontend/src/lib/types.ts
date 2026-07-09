@@ -64,6 +64,7 @@ export type Lead = {
   id: number;
   customer_name: string;
   contact: string;
+  email?: string | null;
   notes?: string | null;
   course_id?: number | null;
   source_id?: number | null;
@@ -85,6 +86,7 @@ export type Lead = {
 export type LeadInput = {
   customer_name: string;
   contact: string;
+  email?: string | null;
   notes?: string | null;
   course_id?: number | null;
   source_id?: number | null;
@@ -125,6 +127,7 @@ export type Session = {
 export type ImportRow = {
   customer_name: string;
   contact: string;
+  email?: string;
   status: string;
   course: string;
   source: string;

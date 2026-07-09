@@ -37,6 +37,7 @@ const el = {
   leadId: document.querySelector("#leadId"),
   leadCustomerName: document.querySelector("#leadCustomerName"),
   leadContact: document.querySelector("#leadContact"),
+  leadEmail: document.querySelector("#leadEmail"),
   leadCourse: document.querySelector("#leadCourse"),
   leadSource: document.querySelector("#leadSource"),
   leadStatus: document.querySelector("#leadStatus"),
@@ -114,7 +115,8 @@ function renderLeads(total = state.leads.length) {
         <tr>
           <td>
             <strong>${escapeHtml(lead.customer_name)}</strong><br />
-            <span class="muted">${escapeHtml(lead.contact)}</span>
+            <span class="muted">${escapeHtml(lead.contact)}</span><br />
+            <span class="muted">${escapeHtml(lead.email || "")}</span>
           </td>
           <td>${escapeHtml(lead.course?.name || "Не выбран")}</td>
           <td><span class="status-pill">${escapeHtml(lead.status?.name || "")}</span></td>
@@ -142,6 +144,7 @@ function openLeadForm(lead = null) {
   el.leadId.value = lead?.id || "";
   el.leadCustomerName.value = lead?.customer_name || "";
   el.leadContact.value = lead?.contact || "";
+  el.leadEmail.value = lead?.email || "";
   el.leadCourse.value = lead?.course_id || "";
   el.leadSource.value = lead?.source_id || "";
   el.leadStatus.value = lead?.status_id || state.statuses[0]?.id || "";
@@ -324,6 +327,7 @@ el.leadForm.addEventListener("submit", async (event) => {
     const payload = {
       customer_name: el.leadCustomerName.value.trim(),
       contact: el.leadContact.value.trim(),
+      email: el.leadEmail.value.trim() || null,
       notes: el.leadNotes.value.trim() || null,
       course_id: el.leadCourse.value ? Number(el.leadCourse.value) : null,
       source_id: el.leadSource.value ? Number(el.leadSource.value) : null,

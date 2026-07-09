@@ -33,6 +33,7 @@ export function ImportExportView({ canImport, dictionaries, leads, users, onCrea
         await onCreate({
           customer_name: row.customer_name,
           contact: row.contact,
+          email: row.email || null,
           notes: row.notes ?? null,
           next_contact_date: row.next_contact_date || null,
           status_id: dictionaries.statuses.find((item) => item.name === row.status || item.code === row.status)?.id ?? dictionaries.statuses[0].id,
@@ -91,11 +92,12 @@ export function ImportExportView({ canImport, dictionaries, leads, users, onCrea
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] border-collapse text-sm">
+            <table className="w-full min-w-[1040px] border-collapse text-sm">
               <thead className="bg-panel text-left text-xs uppercase text-muted">
                 <tr>
                   <th className="px-4 py-3">Клиент</th>
                   <th className="px-4 py-3">Контакт</th>
+                  <th className="px-4 py-3">E-mail</th>
                   <th className="px-4 py-3">Статус</th>
                   <th className="px-4 py-3">Курс</th>
                   <th className="px-4 py-3">Источник</th>
@@ -108,6 +110,7 @@ export function ImportExportView({ canImport, dictionaries, leads, users, onCrea
                   <tr key={`${row.customer_name}-${index}`} className="border-t border-line">
                     <td className="px-4 py-3 font-medium">{row.customer_name}</td>
                     <td className="px-4 py-3">{row.contact}</td>
+                    <td className="px-4 py-3">{row.email || "-"}</td>
                     <td className="px-4 py-3">{row.status}</td>
                     <td className="px-4 py-3">{row.course}</td>
                     <td className="px-4 py-3">{row.source}</td>

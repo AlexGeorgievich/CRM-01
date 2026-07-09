@@ -49,6 +49,7 @@ def _csv_response(leads: list[Lead]) -> StreamingResponse:
             "id",
             "customer_name",
             "contact",
+            "email",
             "status",
             "course",
             "source",
@@ -65,6 +66,7 @@ def _csv_response(leads: list[Lead]) -> StreamingResponse:
                 lead.id,
                 lead.customer_name,
                 lead.contact,
+                lead.email or "",
                 lead.status.name,
                 lead.course.name if lead.course else "",
                 lead.source.name if lead.source else "",
@@ -157,6 +159,7 @@ async def import_leads_csv(
             payload = LeadCreate(
                 customer_name=row.get("customer_name") or "",
                 contact=row.get("contact") or "",
+                email=row.get("email") or None,
                 notes=row.get("notes") or None,
                 course_id=int(row["course_id"]) if row.get("course_id") else None,
                 source_id=int(row["source_id"]) if row.get("source_id") else None,

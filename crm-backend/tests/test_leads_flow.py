@@ -28,6 +28,7 @@ def test_full_lead_lifecycle(client) -> None:
         json={
             "customer_name": "Иван Петров",
             "contact": "+79990000000",
+            "email": " Ivan.Petrov@Example.RU ",
             "notes": "Первичная тестовая заявка",
             "status_id": statuses[0]["id"],
             "course_id": courses[0]["id"],
@@ -39,6 +40,7 @@ def test_full_lead_lifecycle(client) -> None:
     assert create_response.status_code == 201
     lead = create_response.json()
     assert lead["customer_name"] == "Иван Петров"
+    assert lead["email"] == "ivan.petrov@example.ru"
     assert lead["assigned_manager"]["username"] == "manager"
     assert lead["next_contact_date"] == "2026-07-07"
     assert len(lead["comments"]) == 1
@@ -57,6 +59,14 @@ def test_full_lead_lifecycle(client) -> None:
     assert filtered.status_code == 200
     assert filtered.json()["total"] == 1
 
+    filtered_by_email = client.get(
+        "/api/v1/leads",
+        headers=headers,
+        params={"search": "petrov@example.ru"},
+    )
+    assert filtered_by_email.status_code == 200
+    assert filtered_by_email.json()["total"] == 1
+
     overdue = client.get("/api/v1/leads", headers=headers, params={"overdue": True})
     assert overdue.status_code == 200
     assert overdue.json()["total"] == 1
@@ -65,6 +75,8 @@ def test_full_lead_lifecycle(client) -> None:
     assert export_response.status_code == 200
     assert "text/csv" in export_response.headers["content-type"]
     assert "customer_name" in export_response.text
+    assert "email" in export_response.text
+    assert "ivan.petrov@example.ru" in export_response.text
     assert "Иван Петров" in export_response.text
 
     summary_response = client.get("/api/v1/reports/summary", headers=headers)
@@ -118,6 +130,24 @@ def test_lead_reference_validation(client) -> None:
 
     assert response.status_code == 422
     assert response.json()["detail"]["status_id"] == "Status does not exist or is inactive"
+
+
+def test_lead_email_validation(client) -> None:
+    headers = login(client)
+    statuses = client.get("/api/v1/dictionaries/statuses", headers=headers).json()
+
+    response = client.post(
+        "/api/v1/leads",
+        headers=headers,
+        json={
+            "customer_name": "Некорректный email",
+            "contact": "+79990000001",
+            "email": "wrong-address",
+            "status_id": statuses[0]["id"],
+        },
+    )
+
+    assert response.status_code == 422
 
 
 def test_manager_cannot_create_users(client) -> None:

@@ -3,6 +3,7 @@ import type { Dictionaries, ImportRow, Lead, User } from "./types";
 const columns = [
   "customer_name",
   "contact",
+  "email",
   "status",
   "course",
   "source",
@@ -23,6 +24,7 @@ export function leadsToCsv(leads: Lead[]) {
   const rows = leads.map((lead) => [
     lead.customer_name,
     lead.contact,
+    lead.email ?? "",
     lead.status.name,
     lead.course?.name ?? "",
     lead.source?.name ?? "",
@@ -53,6 +55,7 @@ export function parseCsv(text: string, dictionaries: Dictionaries, users: User[]
     const row: ImportRow = {
       customer_name: record.customer_name,
       contact: record.contact,
+      email: record.email,
       status: record.status,
       course: record.course,
       source: record.source,
@@ -64,6 +67,7 @@ export function parseCsv(text: string, dictionaries: Dictionaries, users: User[]
 
     if (!row.customer_name) row.errors.push("Нет имени");
     if (!row.contact) row.errors.push("Нет контакта");
+    if (row.email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(row.email)) row.errors.push("Некорректный e-mail");
     if (!dictionaries.statuses.some((item) => item.name === row.status || item.code === row.status)) row.errors.push("Статус не найден");
     if (row.course && !dictionaries.courses.some((item) => item.name === row.course)) row.errors.push("Курс не найден");
     if (row.source && !dictionaries.sources.some((item) => item.name === row.source)) row.errors.push("Источник не найден");

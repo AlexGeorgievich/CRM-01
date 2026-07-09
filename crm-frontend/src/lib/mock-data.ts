@@ -84,6 +84,7 @@ const leadSeeds: Array<Omit<LeadInput, "status_id"> & { status_id: number; creat
 ].map((row, index) => ({
   customer_name: row[0] as string,
   contact: row[1] as string,
+  email: `client${index + 1}@example.ru`,
   status_id: row[2] as number,
   course_id: row[3] as number,
   source_id: row[4] as number,
@@ -218,7 +219,7 @@ export function mockListLeads(user: User, filters: LeadFilters = {}) {
     })
     .filter((lead) => {
       if (!search) return true;
-      return `${lead.customer_name} ${lead.contact} ${lead.notes ?? ""}`.toLowerCase().includes(search);
+      return `${lead.customer_name} ${lead.contact} ${lead.email ?? ""} ${lead.notes ?? ""}`.toLowerCase().includes(search);
     })
     .sort((a, b) => b.updated_at.localeCompare(a.updated_at));
 

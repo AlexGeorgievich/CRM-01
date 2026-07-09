@@ -64,7 +64,7 @@
           </label>
           <label>
             <span>Поиск</span>
-            <input id="filterSearch" placeholder="Имя или контакт" />
+              <input id="filterSearch" placeholder="Имя, контакт или e-mail" />
           </label>
           <button id="resetFiltersButton" class="secondary-button" type="button">Сбросить</button>
           <button id="newLeadButton" type="button">Новая заявка</button>
@@ -114,6 +114,10 @@
                 <label>
                   <span>Контакт</span>
                   <input id="leadContact" required />
+                </label>
+                <label>
+                  <span>E-mail</span>
+                  <input id="leadEmail" type="email" autocomplete="email" />
                 </label>
                 <label>
                   <span>Курс</span>

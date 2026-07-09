@@ -23,6 +23,7 @@ type Props = {
 const blankLead: LeadInput = {
   customer_name: "",
   contact: "",
+  email: "",
   notes: "",
   status_id: 1,
   course_id: null,
@@ -31,7 +32,7 @@ const blankLead: LeadInput = {
   next_contact_date: ""
 };
 
-type SortKey = "customer_name" | "status" | "course" | "source" | "manager" | "contact" | "next_contact_date";
+type SortKey = "customer_name" | "status" | "course" | "source" | "manager" | "contact" | "email" | "next_contact_date";
 type SortDirection = "asc" | "desc";
 
 export function LeadsView({ canDelete, dictionaries, filters, leads, loading, users, onAddComment, onCreate, onDelete, onFilter, onUpdate }: Props) {
@@ -137,7 +138,7 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
             <Badge>{loading ? "Загрузка" : leads.length}</Badge>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[920px] border-collapse text-sm">
+            <table className="w-full min-w-[1080px] border-collapse text-sm">
               <thead className="bg-panel text-left text-xs uppercase text-muted">
                 <tr>
                   <SortableHeader label="Клиент" sortKey="customer_name" sort={sort} onSort={toggleSort} />
@@ -146,6 +147,7 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
                   <SortableHeader label="Источник" sortKey="source" sort={sort} onSort={toggleSort} />
                   <SortableHeader label="Менеджер" sortKey="manager" sort={sort} onSort={toggleSort} />
                   <SortableHeader label="Контакт" sortKey="contact" sort={sort} onSort={toggleSort} />
+                  <SortableHeader label="E-mail" sortKey="email" sort={sort} onSort={toggleSort} />
                   <SortableHeader label="Следующий контакт" sortKey="next_contact_date" sort={sort} onSort={toggleSort} />
                 </tr>
               </thead>
@@ -175,6 +177,9 @@ export function LeadsView({ canDelete, dictionaries, filters, leads, loading, us
                     <td className="px-4 py-3">{lead.source?.name ?? "-"}</td>
                     <td className="px-4 py-3">{lead.assigned_manager?.full_name ?? "-"}</td>
                     <td className="px-4 py-3">{lead.contact}</td>
+                    <td className="px-4 py-3">
+                      {lead.email ? <a className="text-blue-700 hover:underline" href={`mailto:${lead.email}`} onClick={(event) => event.stopPropagation()}>{lead.email}</a> : "-"}
+                    </td>
                     <td className="px-4 py-3">
                       {lead.next_contact_date ? <Badge tone={isOverdue(lead) ? "danger" : "warning"}>{lead.next_contact_date}</Badge> : "-"}
                     </td>
@@ -286,6 +291,8 @@ function getSortValue(lead: Lead, key: SortKey): string {
       return lead.assigned_manager?.full_name ?? "";
     case "contact":
       return lead.contact;
+    case "email":
+      return lead.email ?? "";
     case "next_contact_date":
       return lead.next_contact_date ?? "";
   }
@@ -367,6 +374,9 @@ function LeadForm({
       <Field label="Контакт">
         <Input value={lead.contact} onChange={(event) => update({ contact: event.target.value })} required />
       </Field>
+      <Field label="E-mail">
+        <Input type="email" autoComplete="email" value={lead.email ?? ""} onChange={(event) => update({ email: event.target.value })} />
+      </Field>
       <div className="grid gap-3 md:grid-cols-2">
         <Field label="Статус">
           <Select value={lead.status_id} onChange={(event) => update({ status_id: Number(event.target.value) })}>
@@ -410,6 +420,7 @@ function normalizeLead(lead: LeadInput): LeadInput {
   return {
     customer_name: lead.customer_name,
     contact: lead.contact,
+    email: lead.email?.trim().toLowerCase() || null,
     notes: lead.notes || null,
     course_id: lead.course_id || null,
     source_id: lead.source_id || null,
@@ -423,6 +434,7 @@ function leadToInput(lead: Lead): LeadInput {
   return {
     customer_name: lead.customer_name,
     contact: lead.contact,
+    email: lead.email ?? "",
     notes: lead.notes ?? "",
     course_id: lead.course_id ?? null,
     source_id: lead.source_id ?? null,

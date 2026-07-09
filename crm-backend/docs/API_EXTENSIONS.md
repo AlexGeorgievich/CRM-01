@@ -65,11 +65,15 @@ PATCH /api/v1/dictionaries/sources/{source_id}
 
 ## Заявки и просрочки
 
-В модель `Lead` добавлено поле:
+В модель `Lead` добавлены поля:
 
 ```text
 next_contact_date: date | null
+email: string | null
 ```
+
+E-mail нормализуется в нижний регистр, проверяется при создании и редактировании и
+участвует в общем поиске заявок.
 
 Просрочка считается так:
 
@@ -122,6 +126,7 @@ Content-Type: multipart/form-data
 
 - `customer_name`
 - `contact`
+- `email`
 - `status_id`
 - `course_id`
 - `source_id`
@@ -167,11 +172,12 @@ Endpoint поддерживает общие фильтры заявок и уч
 
 ## Миграция
 
-Добавлена ревизия:
+Добавлены ревизии:
 
 ```text
 20260708_0002_add_next_contact_date.py
+20260709_0003_add_lead_email.py
 ```
 
-Она добавляет колонку `leads.next_contact_date` и индекс
-`ix_leads_next_contact_date`.
+Они добавляют колонки `leads.next_contact_date`, `leads.email` и соответствующие
+индексы `ix_leads_next_contact_date`, `ix_leads_email`.
